@@ -19,5 +19,4 @@ void *corrida_de_threads(void *t){
     }
     pthread_mutex_unlock(&t_infos->vencedor_mutex);
 
-    return NULL;
 }
