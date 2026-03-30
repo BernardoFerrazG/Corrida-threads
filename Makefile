@@ -1,6 +1,6 @@
 TARGET = corrida
 SRC = main.c threads.c
-NTHREADS ?= 7
+NTHREADS ?= 5
 
 all:
 	gcc $(SRC) -o $(TARGET) -pthread -D_XOPEN_SOURCE=700
