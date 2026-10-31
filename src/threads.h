@@ -1,24 +1,22 @@
 #ifndef THREADS_H
 #define THREADS_H
 
-#define _XOPEN_SOURCE 700
-
 #include <pthread.h>
 
-#define MAX 99
+/* Estado compartilhado por todas as threads da corrida. */
+typedef struct {
+    int alvo;                     /* cada thread conta de 0 até este valor */
+    int vencedora;                /* id da primeira thread a terminar, -1 enquanto ninguém terminou */
+    pthread_barrier_t largada;    /* segura todas as threads até a última estar pronta */
+    pthread_mutex_t mutex_vencedora;
+} Corrida;
 
-typedef struct{
-    int num_threads;
-    int t_num_vencedor;
-    pthread_barrier_t barreira;
-    pthread_mutex_t vencedor_mutex;
-} Thread_infos;
+/* Argumento de cada thread. */
+typedef struct {
+    int id;
+    Corrida *corrida;
+} Corredora;
 
-typedef struct{
-    int t_num;
-    Thread_infos *infos;
-} Thread;
-
-void *corrida_de_threads(void *t);
+void *correr(void *arg);
 
 #endif
