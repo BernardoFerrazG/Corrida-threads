@@ -2,21 +2,24 @@
 
 #include <stdio.h>
 
-void *corrida_de_threads(void *t){
-    Thread *thread = (Thread *)t;
-    Thread_infos *t_infos = thread->infos;
+void *correr(void *arg) {
+    Corredora *corredora = arg;
+    Corrida *corrida = corredora->corrida;
 
-    pthread_barrier_wait(&t_infos->barreira);
+    /* Ninguém larga antes de todas as threads estarem criadas. */
+    pthread_barrier_wait(&corrida->largada);
 
-    for (int i = 0; i <= MAX; i++){
-        printf("Thread %d: %d\n", thread->t_num, i);
+    for (int i = 0; i <= corrida->alvo; i++) {
+        printf("Thread %d: %d\n", corredora->id, i);
     }
 
-    pthread_mutex_lock(&t_infos->vencedor_mutex);
-    if (t_infos->t_num_vencedor == -1){
-        t_infos->t_num_vencedor = thread->t_num;
-        printf(">>>>> Thread %d venceu! <<<<<\n", thread->t_num);
+    /* Seção crítica: só a primeira thread a chegar aqui é registrada como vencedora. */
+    pthread_mutex_lock(&corrida->mutex_vencedora);
+    if (corrida->vencedora == -1) {
+        corrida->vencedora = corredora->id;
+        printf(">>>>> Thread %d venceu! <<<<<\n", corredora->id);
     }
-    pthread_mutex_unlock(&t_infos->vencedor_mutex);
+    pthread_mutex_unlock(&corrida->mutex_vencedora);
 
+    return NULL;
 }

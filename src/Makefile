@@ -1,12 +1,28 @@
-TARGET = corrida
-SRC = main.c threads.c
+CC      ?= gcc
+CFLAGS  ?= -Wall -Wextra -Wpedantic -O2
+CPPFLAGS += -D_XOPEN_SOURCE=700
+LDLIBS  += -pthread
+CFLAGS  += -std=c11 -pthread
+
+TARGET   = corrida
+OBJS     = main.o threads.o
 NTHREADS ?= 5
 
-all:
-	gcc $(SRC) -o $(TARGET) -pthread -D_XOPEN_SOURCE=700
+.PHONY: all run test clean
 
-run: all
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $^ -o $@ $(LDLIBS)
+
+%.o: %.c threads.h
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+run: $(TARGET)
 	./$(TARGET) $(NTHREADS)
 
+test: $(TARGET)
+	./test.sh
+
 clean:
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(OBJS)

@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (warnings as errors)
+        run: make -C src CFLAGS="-Wall -Wextra -Wpedantic -O2 -Werror"
+      - name: Behaviour tests
+        run: make -C src test
+      - name: ThreadSanitizer
+        run: |
+          make -C src clean
+          make -C src CFLAGS="-fsanitize=thread -g -O1" LDLIBS="-pthread -fsanitize=thread"
+          make -C src test
